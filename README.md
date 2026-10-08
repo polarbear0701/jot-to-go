@@ -4,12 +4,14 @@ A Notion-style note-taking web app that mixes **typed notes** with **handwriting
 (stylus, finger or mouse). Frontend only for now — data is stored in `localStorage` until a backend exists.
 
 Built with React 19, TypeScript, Vite, Tailwind CSS v4 and shadcn/ui (Radix primitives).
+Uses [Bun](https://bun.sh) (1.4+) as the package manager and runtime.
 
 ```bash
-npm install
-npm run dev      # http://localhost:5173
-npm run build    # type-check + production build
-npm run lint     # oxlint
+bun install
+bun run dev      # http://localhost:5173
+bun run build    # type-check + production build
+bun run preview  # serve the production build
+bun run lint     # oxlint
 ```
 
 ## Features
@@ -62,4 +64,4 @@ src/
   API-backed adapter, or turn the actions into API calls with optimistic updates.
 - Strokes are stored as `[x, y, pressure]` points in world coordinates, so they're resolution independent
   and render the same on any device.
-- `components.json` is configured, so `npx shadcn@latest add <component>` works for adding more UI.
+- `components.json` is configured, so `bunx --bun shadcn@latest add <component>` works for adding more UI.

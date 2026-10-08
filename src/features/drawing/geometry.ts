@@ -72,14 +72,21 @@ function outlineToPath(points: number[][], closed = true) {
   return d
 }
 
-export function strokeToPath(stroke: Pick<Stroke, 'tool' | 'size' | 'points' | 'pressure'>, complete = true) {
+export const strokeOpacity = (stroke: Pick<Stroke, 'tool' | 'opacity'>) =>
+  stroke.opacity ?? (stroke.tool === 'highlighter' ? 0.4 : 1)
+
+export function strokeToPath(
+  stroke: Pick<Stroke, 'tool' | 'size' | 'points' | 'pressure' | 'thinning' | 'streamline'>,
+  complete = true,
+) {
   const highlighter = stroke.tool === 'highlighter'
+  const thinning = stroke.thinning ?? (highlighter ? 0 : 0.6)
   const outline = getStroke(stroke.points, {
     size: stroke.size,
-    thinning: highlighter ? 0 : 0.6,
+    thinning,
     smoothing: 0.5,
-    streamline: 0.45,
-    simulatePressure: !stroke.pressure && !highlighter,
+    streamline: stroke.streamline ?? 0.45,
+    simulatePressure: !stroke.pressure && thinning > 0,
     last: complete,
     start: { cap: !highlighter },
     end: { cap: !highlighter },

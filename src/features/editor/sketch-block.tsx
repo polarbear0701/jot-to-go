@@ -65,13 +65,14 @@ export function SketchBlockView({ block, onChange }: SketchBlockViewProps) {
     <div ref={ref} className="group/sketch relative my-2 w-full" onPointerDownCapture={() => setActive(true)}>
       <div
         className={cn(
-          'absolute -top-12 left-0 z-10 flex items-center gap-2 transition-opacity',
+          'absolute -top-12 right-0 left-0 z-10 flex items-center gap-2 transition-opacity',
           active ? 'opacity-100' : 'pointer-events-none opacity-0',
         )}
       >
         <DrawingToolbar
           compact
           showHand={false}
+          className="max-w-full overflow-x-auto"
           onUndo={history.undo}
           onRedo={history.redo}
           canUndo={history.canUndo}

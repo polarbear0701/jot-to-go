@@ -24,7 +24,11 @@ bun run lint     # oxlint
 
 **Drawing**
 - Pressure-sensitive ink via [`perfect-freehand`](https://github.com/steveruizok/perfect-freehand), with coalesced pointer events for smooth strokes.
-- Tools: pen, highlighter (sits under the ink), stroke eraser (also the stylus eraser button), hand. Colors, sizes, undo/redo.
+- Tools: pen, highlighter (sits under the ink), stroke eraser (also the stylus eraser button), hand, undo/redo.
+- **Tap the selected tool again** for its settings: thickness, opacity, pressure sensitivity and smoothing (with a live preview).
+- 50-color palette plus a custom color picker / hex input.
+- **Pencilcase**: save up to 3 pen setups and 5 favourite colors; they sit right in the toolbar.
+- On canvas pages the tool palette can be **dragged anywhere** and **collapsed** into a small round button.
 - **Page mode** – A4 sheets stacked vertically with blank / lined / grid / dotted paper, "Add page".
 - **Infinite mode** – boundless board (like Freeform) with pan & zoom. Switch modes at any time; strokes are kept.
 - **Stylus only** (palm rejection): the pen draws, fingers pan / pinch-zoom (or scroll the note for inline sketches).

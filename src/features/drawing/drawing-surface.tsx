@@ -16,6 +16,7 @@ import {
   pageRect,
   resolveColor,
   screenToWorld,
+  strokeOpacity,
   strokeToPath,
   strokesBounds,
   zoomAt,
@@ -324,11 +325,15 @@ export function DrawingSurface({ strokes, onCommit, layout, onAddPage, className
     gesture.current = null
 
     if (g.type === 'draw' && !cancelled) {
+      const cfg = prefs[g.tool]
       const stroke: Stroke = {
         id: newId(),
         tool: g.tool,
-        color: g.tool === 'pen' ? prefs.penColor : prefs.highlighterColor,
-        size: g.tool === 'pen' ? prefs.penSize : prefs.highlighterSize,
+        color: cfg.color,
+        size: cfg.size,
+        opacity: cfg.opacity,
+        thinning: cfg.thinning,
+        streamline: cfg.streamline,
         points: g.points,
         pressure: g.pressure,
       }
@@ -371,18 +376,13 @@ export function DrawingSurface({ strokes, onCommit, layout, onAddPage, className
     () =>
       live
         ? strokeToPath(
-            {
-              tool: live.tool,
-              size: live.tool === 'pen' ? prefs.penSize : prefs.highlighterSize,
-              points: live.points,
-              pressure: live.pressure,
-            },
+            { ...prefs[live.tool], tool: live.tool, points: live.points, pressure: live.pressure },
             false,
           )
         : '',
     // live.points is mutated in place; the tick forces recomputation.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [live, live?.points.length, prefs.penSize, prefs.highlighterSize],
+    [live, live?.points.length, prefs.pen, prefs.highlighter],
   )
 
   const pageCount = layout.kind === 'pages' ? layout.pageCount : 0
@@ -475,8 +475,8 @@ export function DrawingSurface({ strokes, onCommit, layout, onAddPage, className
             {live && livePath && (
               <path
                 d={livePath}
-                fill={resolveColor(live.tool === 'pen' ? prefs.penColor : prefs.highlighterColor)}
-                fillOpacity={live.tool === 'highlighter' ? 0.4 : 1}
+                fill={resolveColor(prefs[live.tool].color)}
+                fillOpacity={prefs[live.tool].opacity}
               />
             )}
           </g>
@@ -571,6 +571,6 @@ const StrokeLayer = memo(function StrokeLayer({ strokes, erased }: { strokes: St
 
 export const StrokePath = memo(function StrokePath({ stroke, faded }: { stroke: Stroke; faded?: boolean }) {
   const d = useMemo(() => strokeToPath(stroke), [stroke])
-  const base = stroke.tool === 'highlighter' ? 0.4 : 1
+  const base = strokeOpacity(stroke)
   return <path d={d} fill={resolveColor(stroke.color)} fillOpacity={faded ? base * 0.15 : base} />
 })

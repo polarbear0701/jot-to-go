@@ -23,6 +23,12 @@ export interface Stroke {
   points: StrokePoint[]
   /** True when the points carry real pressure data (stylus). */
   pressure: boolean
+  /** 0..1. Defaults to 1 for pens and 0.4 for highlighters (older strokes). */
+  opacity?: number
+  /** Pressure sensitivity, 0..1 (perfect-freehand `thinning`). */
+  thinning?: number
+  /** Smoothing, 0..1 (perfect-freehand `streamline`). */
+  streamline?: number
 }
 
 export type PaperStyle = 'blank' | 'lined' | 'grid' | 'dotted'

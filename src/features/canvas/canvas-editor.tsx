@@ -11,7 +11,7 @@ import {
 } from '@/components/ui/dropdown-menu'
 import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group'
 import { DrawingSurface } from '@/features/drawing/drawing-surface'
-import { DrawingToolbar } from '@/features/drawing/drawing-toolbar'
+import { FloatingPalette } from '@/features/drawing/floating-palette'
 import { PAPER_OPTIONS, PaperSwatch } from '@/features/drawing/paper'
 import { useDrawingShortcuts } from '@/features/drawing/use-drawing-shortcuts'
 import { useHistory } from '@/hooks/use-history'
@@ -56,17 +56,14 @@ export function CanvasEditor({ page }: { page: CanvasPage }) {
         </div>
       </div>
 
-      {/* Tools */}
-      <div className="pointer-events-none absolute inset-x-0 top-3 flex justify-center px-3">
-        <DrawingToolbar
-          className="pointer-events-auto max-w-full overflow-x-auto"
-          onUndo={history.undo}
-          onRedo={history.redo}
-          canUndo={history.canUndo}
-          canRedo={history.canRedo}
-          onClear={canvas.strokes.length ? () => history.commit([]) : undefined}
-        />
-      </div>
+      {/* Tools: draggable, collapsible palette */}
+      <FloatingPalette
+        onUndo={history.undo}
+        onRedo={history.redo}
+        canUndo={history.canUndo}
+        canRedo={history.canRedo}
+        onClear={canvas.strokes.length ? () => history.commit([]) : undefined}
+      />
 
       {/* Mode & paper */}
       <div className="absolute bottom-3 left-3 flex items-center gap-2 md:top-3 md:right-3 md:bottom-auto md:left-auto">

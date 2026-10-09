@@ -80,11 +80,14 @@ interface UIState {
   sidebarOpen: boolean
   expanded: Record<ID, boolean>
   searchOpen: boolean
+  /** How notes are shown: block editor or raw Markdown source. Not persisted. */
+  noteView: 'blocks' | 'markdown'
   drawing: DrawingPrefs
   setTheme: (theme: Theme) => void
   setSidebarOpen: (open: boolean) => void
   toggleExpanded: (id: ID, value?: boolean) => void
   setSearchOpen: (open: boolean) => void
+  setNoteView: (view: 'blocks' | 'markdown') => void
   setDrawing: (patch: Partial<DrawingPrefs>) => void
   setPenConfig: (tool: InkTool, patch: Partial<PenConfig>) => void
   /** Sets the color of the active ink tool, switching to the pen if needed. */
@@ -104,12 +107,14 @@ export const useUI = create<UIState>()(
       sidebarOpen: typeof window === 'undefined' ? true : window.innerWidth >= 768,
       expanded: {},
       searchOpen: false,
+      noteView: 'blocks',
       drawing: DEFAULT_DRAWING,
       setTheme: (theme) => set({ theme }),
       setSidebarOpen: (sidebarOpen) => set({ sidebarOpen }),
       toggleExpanded: (id, value) =>
         set((s) => ({ expanded: { ...s.expanded, [id]: value ?? !s.expanded[id] } })),
       setSearchOpen: (searchOpen) => set({ searchOpen }),
+      setNoteView: (noteView) => set({ noteView }),
       setDrawing: (patch) => set((s) => ({ drawing: { ...s.drawing, ...patch } })),
       setPenConfig: (tool, patch) =>
         set((s) => ({ drawing: { ...s.drawing, [tool]: { ...s.drawing[tool], ...patch } } })),

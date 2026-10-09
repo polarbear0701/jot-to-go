@@ -37,6 +37,7 @@ interface BlockTextProps {
   onChange: (text: string, el: HTMLElement) => void
   onKeyDown: (e: KeyboardEvent<HTMLDivElement>, el: HTMLElement) => void
   onToggle: () => void
+  onPasteText: (text: string, el: HTMLElement) => boolean
   /** Position within a run of numbered items. */
   number: number
 }
@@ -46,7 +47,7 @@ interface BlockTextProps {
  * position in the tree so changing the block type never remounts the editor
  * (and therefore never loses focus).
  */
-export function BlockText({ block, elRef, onChange, onKeyDown, onToggle, number }: BlockTextProps) {
+export function BlockText({ block, elRef, onChange, onKeyDown, onToggle, onPasteText, number }: BlockTextProps) {
   const t = block.type
   const ph = PLACEHOLDER[t]
   return (
@@ -83,6 +84,8 @@ export function BlockText({ block, elRef, onChange, onKeyDown, onToggle, number 
         value={block.text}
         onChange={onChange}
         onKeyDown={onKeyDown}
+        onPasteText={onPasteText}
+        inlineMarkdown={t !== 'code'}
         placeholder={ph?.always}
         focusPlaceholder={ph?.focus}
         spellCheck={t !== 'code'}

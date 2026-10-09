@@ -98,6 +98,11 @@ export function createSeedPages(): Record<string, Page> {
       text('heading2', 'Typing'),
       text('bulleted', 'Press “/” on an empty line to insert headings, lists, to-dos, quotes, code or a sketch.'),
       text('bulleted', 'Markdown shortcuts work too: “# ”, “- ”, “1. ”, “[] ”, “> ”, “```” and “---”.'),
+      text(
+        'bulleted',
+        'Inline Markdown renders as you go: **bold**, *italic*, `code`, ~~strike~~ and [links](https://bun.sh). ⌘B, ⌘I, ⌘E and ⌘K format a selection.',
+      ),
+      text('bulleted', 'Every note is Markdown underneath: use the **Markdown** button at the top, or export it as a .md file from the ••• menu.'),
       text('todo', 'Try checking this box', true),
       text('todo', 'Create your first page from the sidebar'),
       text('heading2', 'Drawing'),

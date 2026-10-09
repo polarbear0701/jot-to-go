@@ -1,15 +1,17 @@
-import { ChevronsRight, Menu, MoreHorizontal, Share2, Star } from 'lucide-react'
+import { ChevronsRight, Copy, Download, FileCode2, Menu, MoreHorizontal, Share2, Star } from 'lucide-react'
 
 import { Button } from '@/components/ui/button'
 import {
   DropdownMenu,
   DropdownMenuCheckboxItem,
   DropdownMenuContent,
+  DropdownMenuItem,
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
+import { copyMarkdown, downloadMarkdown } from '@/features/markdown/files'
 import { PageGlyph } from '@/features/page/page-icon'
 import { PageMenuItems } from '@/features/page/page-menu'
 import { openPage } from '@/hooks/use-route'
@@ -25,6 +27,8 @@ export function Topbar({ page, title }: { page?: Page; title?: string }) {
   const pages = useWorkspace((s) => s.pages)
   const toggleFavorite = useWorkspace((s) => s.toggleFavorite)
   const updatePage = useWorkspace((s) => s.updatePage)
+  const noteView = useUI((s) => s.noteView)
+  const setNoteView = useUI((s) => s.setNoteView)
   const trail = page ? breadcrumbsOf(pages, page.id) : []
 
   return (
@@ -62,6 +66,22 @@ export function Topbar({ page, title }: { page?: Page; title?: string }) {
       {page && (
         <div className="flex shrink-0 items-center gap-0.5">
           <span className="mr-2 hidden text-xs text-muted-foreground lg:inline">Edited {timeAgo(page.updatedAt)}</span>
+          {page.kind === 'note' && (
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className={cn('h-7 px-2', noteView === 'markdown' && 'bg-accent text-foreground')}
+                  aria-pressed={noteView === 'markdown'}
+                  onClick={() => setNoteView(noteView === 'markdown' ? 'blocks' : 'markdown')}
+                >
+                  <FileCode2 /> <span className="max-sm:hidden">Markdown</span>
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent>{noteView === 'markdown' ? 'Back to the block editor' : 'View and edit as Markdown'}</TooltipContent>
+            </Tooltip>
+          )}
           <Tooltip>
             <TooltipTrigger asChild>
               <Button variant="ghost" size="sm" className="h-7 max-sm:hidden" disabled>
@@ -99,6 +119,13 @@ export function Topbar({ page, title }: { page?: Page; title?: string }) {
                   >
                     Full width
                   </DropdownMenuCheckboxItem>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem onSelect={() => void copyMarkdown(page)}>
+                    <Copy /> Copy as Markdown
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onSelect={() => downloadMarkdown(page)}>
+                    <Download /> Export as Markdown (.md)
+                  </DropdownMenuItem>
                   <DropdownMenuSeparator />
                 </>
               )}

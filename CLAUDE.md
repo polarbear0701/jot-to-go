@@ -43,6 +43,7 @@ src/
       pen-settings.tsx      per-tool settings popover (tap the active tool again)
       color-picker.tsx, colors.ts, pencilcase.tsx, pen-preview.tsx, paper.tsx
     editor/               block editor (notes): blocks, slash menu, caret utils, sketch block
+    markdown/             inline tokenizer + preview, blocks <-> Markdown, .md import/export, source view
     home/ search/ shell/ sidebar/ page/   app chrome and page helpers
   hooks/                  use-route (hash router), use-theme, use-history (undo/redo)
   lib/types.ts            domain model — the shape of all persisted data
@@ -85,6 +86,11 @@ src/
   (`EditableText`); the DOM is only rewritten when the value changes from outside, which keeps
   the caret and native undo intact. Keep a block's `EditableText` at a stable position in the tree
   so changing the block type doesn't remount it.
+- **Markdown:** block `text` is stored as Markdown source, so inline formatting (`**bold**`, links, …)
+  lives in the string; `EditableText` renders it when the block isn't focused (`features/markdown/inline.ts`).
+  `features/markdown/markdown.ts` converts whole notes to and from `.md`. Keep `blocksToMarkdown` →
+  `markdownToBlocks` lossless for every block type, sketches included (they travel as a
+  `<!-- jot:sketch {...} -->` comment plus an SVG image).
 - **Routing:** hash based — `#/` is home, `#/p/<pageId>` opens a page.
 
 ## Backend later

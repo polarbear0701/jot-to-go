@@ -3,6 +3,7 @@ import { ImageIcon, SmilePlus } from 'lucide-react'
 
 import { Button } from '@/components/ui/button'
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
+import { markdownToBlocks } from '@/features/markdown/markdown'
 import { COVERS, randomCover } from '@/features/page/covers'
 import { EmojiPicker, PageIconButton } from '@/features/page/page-icon'
 import type { Block, NotePage, SketchBlock, TextBlock } from '@/lib/types'
@@ -15,10 +16,12 @@ import { CONTINUING_TYPES, MARKDOWN_SHORTCUTS, createBlock, filterBlockTypes, ty
 import {
   getCaretOffset,
   getCaretRect,
+  getSelectionOffsets,
   hasSelection,
   isCaretOnFirstLine,
   isCaretOnLastLine,
   setCaretOffset,
+  setSelectionOffsets,
 } from './caret'
 import { EditableText } from './editable-text'
 import { SketchBlockView } from './sketch-block'
@@ -36,6 +39,44 @@ interface SlashState {
 }
 
 const insertText = (text: string) => document.execCommand('insertText', false, text)
+
+/** Inline Markdown markers toggled by ⌘B / ⌘I / ⌘E / ⌘⇧S. */
+function formatMarker(e: KeyboardEvent): string | null {
+  if (!(e.metaKey || e.ctrlKey) || e.altKey) return null
+  const k = e.key.toLowerCase()
+  if (!e.shiftKey && k === 'b') return '**'
+  if (!e.shiftKey && k === 'i') return '*'
+  if (!e.shiftKey && k === 'e') return '`'
+  if (e.shiftKey && k === 's') return '~~'
+  return null
+}
+
+/** Wraps the selection in `marker` (or unwraps it if it is already wrapped). */
+function toggleWrap(el: HTMLElement, marker: string) {
+  const text = el.textContent ?? ''
+  const [start, end] = getSelectionOffsets(el)
+  const selected = text.slice(start, end)
+  const m = marker.length
+  if (text.slice(start - m, start) === marker && text.slice(end, end + m) === marker) {
+    setSelectionOffsets(el, start - m, end + m)
+    insertText(selected)
+    setSelectionOffsets(el, start - m, end - m)
+  } else {
+    insertText(marker + selected + marker)
+    setSelectionOffsets(el, start + m, end + m)
+  }
+}
+
+/** ⌘K: turn the selection into a Markdown link and select the URL placeholder. */
+function insertLink(el: HTMLElement) {
+  const text = el.textContent ?? ''
+  const [start, end] = getSelectionOffsets(el)
+  const label = text.slice(start, end) || 'link'
+  const url = 'https://'
+  insertText(`[${label}](${url})`)
+  const urlStart = start + label.length + 3
+  setSelectionOffsets(el, urlStart, urlStart + url.length)
+}
 
 export function NoteEditor({ page }: { page: NotePage }) {
   const setBlocks = useWorkspace((s) => s.setBlocks)
@@ -205,6 +246,21 @@ export function NoteEditor({ page }: { page: NotePage }) {
     const mod = e.metaKey || e.ctrlKey
     const caret = () => getCaretOffset(el)
 
+    if (block.type !== 'code') {
+      const marker = formatMarker(e)
+      if (marker) {
+        e.preventDefault()
+        toggleWrap(el, marker)
+        return
+      }
+      if (mod && !e.shiftKey && e.key.toLowerCase() === 'k') {
+        e.preventDefault()
+        e.stopPropagation() // ⌘K would otherwise open search
+        insertLink(el)
+        return
+      }
+    }
+
     switch (e.key) {
       case 'Enter': {
         if (block.type === 'code' && !e.shiftKey && !mod) {
@@ -311,6 +367,25 @@ export function NoteEditor({ page }: { page: NotePage }) {
     }
   }
 
+  // ---- Paste ------------------------------------------------------------------------
+  /** Multi-line Markdown pasted into a block becomes real blocks. */
+  const onPasteText = (block: TextBlock, text: string, el: HTMLElement) => {
+    if (block.type === 'code' || !text.includes('\n')) return false
+    const parsed = markdownToBlocks(text).blocks
+    if (parsed.length === 0) return false
+    if (parsed.length === 1 && parsed[0].type === 'paragraph') return false
+    setSlash(null)
+    const [start, end] = getSelectionOffsets(el)
+    const before = block.text.slice(0, start)
+    const after = block.text.slice(end)
+    const head = before.trim() ? [{ ...block, text: before }] : []
+    const tail = after.trim() ? [createBlock('paragraph', after)] : []
+    replaceBlock(block.id, ...head, ...parsed, ...tail)
+    const last = [...parsed].reverse().find(isTextBlock)
+    if (last) pendingFocus.current = { id: last.id, offset: 'end' }
+    return true
+  }
+
   // ---- Title ------------------------------------------------------------------------
   const focusFirstBlock = () => {
     const first = blocksRef.current[0]
@@ -410,6 +485,7 @@ export function NoteEditor({ page }: { page: NotePage }) {
                     onChange={(text, el) => onTextChange(block, text, el)}
                     onKeyDown={(e, el) => onTextKeyDown(e, block, index, el)}
                     onToggle={() => updateBlock(block.id, { checked: !block.checked })}
+                    onPasteText={(text, el) => onPasteText(block, text, el)}
                   />
                 ) : null}
                 {block.type === 'sketch' && (

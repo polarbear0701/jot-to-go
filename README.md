@@ -22,6 +22,15 @@ bun run lint     # oxlint
 - Enter / Backspace / Delete / arrow keys behave like Notion (split, merge, move between blocks).
 - Block handle (⋮⋮): turn into, duplicate, move, delete. Page icon (emoji), gradient cover, full-width mode.
 
+**Markdown**
+- Notes are Markdown underneath. Inline `**bold**`, `*italic*`, `` `code` ``, `~~strike~~` and links render
+  in place and show their source while you edit that block. ⌘B / ⌘I / ⌘E / ⌘⇧S / ⌘K format a selection.
+- **Markdown view** (top bar): see and edit the whole note as Markdown; changes sync back to the blocks.
+- **Export** a note as a `.md` file or copy it as Markdown (••• menu). Sketches are kept: an HTML comment
+  carries the strokes for re-import and an embedded SVG image shows the drawing in other apps.
+- **Import** `.md` files from *New page → Import Markdown…* or by dropping them anywhere on the app.
+  Pasting multi-line Markdown into a note turns it into blocks.
+
 **Drawing**
 - Pressure-sensitive ink via [`perfect-freehand`](https://github.com/steveruizok/perfect-freehand), with coalesced pointer events for smooth strokes.
 - Tools: pen, highlighter (sits under the ink), stroke eraser (also the stylus eraser button), hand, undo/redo.
@@ -44,7 +53,7 @@ bun run lint     # oxlint
 | --- | --- |
 | Anywhere | `⌘K` search · `⌘\` sidebar |
 | Canvas | `P` pen · `H` highlighter · `E` eraser · hold `Space` to pan · `⌘Z` / `⇧⌘Z` undo / redo · `⌘`/`Ctrl` + scroll or pinch to zoom |
-| Notes | `/` commands · `⇧Enter` soft line break (exits code blocks) |
+| Notes | `/` commands · `⇧Enter` soft line break (exits code blocks) · `⌘B` `⌘I` `⌘E` `⌘⇧S` `⌘K` inline formatting |
 
 ## Project layout
 

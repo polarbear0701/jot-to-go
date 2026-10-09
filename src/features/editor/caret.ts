@@ -80,3 +80,38 @@ export function isCaretOnLastLine(el: HTMLElement) {
   const pad = parseFloat(getComputedStyle(el).paddingBottom) || 0
   return rect.bottom > box.bottom - pad - lineHeight(el) * 0.75
 }
+
+/** Selects the text between two offsets (or places the caret when they are equal). */
+export function setSelectionOffsets(el: HTMLElement, start: number, end: number) {
+  el.focus({ preventScroll: true })
+  const sel = window.getSelection()
+  if (!sel) return
+  const point = (offset: number): [Node, number] => {
+    const walker = document.createTreeWalker(el, NodeFilter.SHOW_TEXT)
+    let remaining = offset
+    let node = walker.nextNode()
+    if (!node) return [el, 0]
+    while (node) {
+      const len = node.textContent?.length ?? 0
+      if (remaining <= len) return [node, remaining]
+      remaining -= len
+      const next = walker.nextNode()
+      if (!next) return [node, len]
+      node = next
+    }
+    return [el, 0]
+  }
+  const range = document.createRange()
+  range.setStart(...point(start))
+  range.setEnd(...point(end))
+  sel.removeAllRanges()
+  sel.addRange(range)
+}
+
+/** Raw offsets of the current selection inside `el`. */
+export function getSelectionOffsets(el: HTMLElement): [number, number] {
+  const start = getCaretOffset(el)
+  const sel = window.getSelection()
+  const length = sel && !sel.isCollapsed && el.contains(sel.anchorNode) ? sel.toString().length : 0
+  return [start, start + length]
+}

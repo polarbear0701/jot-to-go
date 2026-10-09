@@ -1,6 +1,7 @@
 import { create } from 'zustand'
 import { createJSONStorage, persist } from 'zustand/middleware'
 
+import { stripInline } from '@/features/markdown/inline'
 import { newId } from '@/lib/id'
 import type { Block, CanvasContent, CanvasMode, CanvasPage, ID, NotePage, Page } from '@/lib/types'
 import { createSeedPages } from './seed'
@@ -16,7 +17,7 @@ type PagePatch = Partial<Omit<NotePage, 'id' | 'kind' | 'blocks'>>
 
 interface WorkspaceState {
   pages: Record<ID, Page>
-  createNote: (opts?: { parentId?: ID | null }) => ID
+  createNote: (opts?: { parentId?: ID | null; title?: string; blocks?: Block[] }) => ID
   createCanvas: (opts?: { parentId?: ID | null; mode?: CanvasMode }) => ID
   updatePage: (id: ID, patch: PagePatch) => void
   setBlocks: (id: ID, blocks: Block[]) => void
@@ -54,7 +55,7 @@ export const useWorkspace = create<WorkspaceState>()(
           id,
           kind: 'note',
           parentId: opts.parentId ?? null,
-          title: '',
+          title: opts.title ?? '',
           icon: null,
           cover: null,
           favorite: false,
@@ -62,7 +63,7 @@ export const useWorkspace = create<WorkspaceState>()(
           fullWidth: false,
           createdAt: now,
           updatedAt: now,
-          blocks: [{ id: newId(), type: 'paragraph', text: '' }],
+          blocks: opts.blocks?.length ? opts.blocks : [{ id: newId(), type: 'paragraph', text: '' }],
         }
         set((s) => ({ pages: { ...s.pages, [id]: page } }))
         return id
@@ -206,7 +207,7 @@ export const pageTitle = (page: Pick<Page, 'title'>) => page.title.trim() || 'Un
 export function pagePlainText(page: Page) {
   if (page.kind !== 'note') return ''
   return page.blocks
-    .map((b) => ('text' in b ? b.text : ''))
+    .map((b) => ('text' in b ? (b.type === 'code' ? b.text : stripInline(b.text)) : ''))
     .filter(Boolean)
     .join(' ')
 }

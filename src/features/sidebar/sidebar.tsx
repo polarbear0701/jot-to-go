@@ -4,6 +4,7 @@ import {
   ChevronRight,
   ChevronsLeft,
   ChevronsUpDown,
+  FileDown,
   FilePlus2,
   Home,
   Infinity as InfinityIcon,
@@ -29,6 +30,7 @@ import {
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
+import { pickMarkdownFiles } from '@/features/markdown/files'
 import { closeSidebarOnMobile, newCanvas, newNote } from '@/features/page/actions'
 import { PageGlyph } from '@/features/page/page-icon'
 import { PageMenuItems } from '@/features/page/page-menu'
@@ -255,6 +257,20 @@ function NewMenu({ children, parentId = null }: { children: React.ReactNode; par
           <div>
             <div className="font-medium">Canvas · Infinite</div>
             <div className="text-xs text-muted-foreground">A boundless board for ideas and diagrams</div>
+          </div>
+        </DropdownMenuItem>
+        <DropdownMenuSeparator />
+        <DropdownMenuItem
+          onSelect={() => {
+            pickMarkdownFiles(parentId)
+            closeSidebarOnMobile()
+          }}
+          className="items-start"
+        >
+          <FileDown className="mt-0.5" />
+          <div>
+            <div className="font-medium">Import Markdown…</div>
+            <div className="text-xs text-muted-foreground">Turn .md files into notes (or drop them anywhere)</div>
           </div>
         </DropdownMenuItem>
       </DropdownMenuContent>
